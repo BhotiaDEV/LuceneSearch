@@ -9,7 +9,6 @@ namespace LuceneConsoleApp.Models
 {
     internal class DocModel
     {
-        public string Page { get; set; }
 
         [Required]
         public string Path { get; set; }
