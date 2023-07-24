@@ -15,7 +15,8 @@ namespace Lucene.Services
         public void ReadPpt (string filepath)
         {
             TextExtractor tika = new TextExtractor();
-            Console.WriteLine(tika.Extract(filepath));
+            Console.WriteLine(tika.Extract(filepath).Text);
+            Console.ReadLine();
         }
     }
 }
