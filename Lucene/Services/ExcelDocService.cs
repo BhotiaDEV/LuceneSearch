@@ -1,19 +1,15 @@
 ﻿using OfficeOpenXml;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Lucene.Services
 {
     internal class ExcelDocService
     {
-        public void ReadExcelFile(string filePath)
+        public void ReadExcel(string filepath)
         {
             ExcelPackage.LicenseContext = LicenseContext.Commercial;
-            using (var package = new ExcelPackage(new FileInfo(filePath)))
+            using (var package = new ExcelPackage(new FileInfo(filepath)))
             {
                 if (package.Workbook.Worksheets.Count > 0)
                 {
