@@ -19,6 +19,7 @@ using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using System.ComponentModel;
 using Lucene.Services;
+using Lucene;
 
 namespace LuceneConsoleApp
 {
@@ -28,13 +29,13 @@ namespace LuceneConsoleApp
         private static string basePath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
         private readonly string indexPath = Path.Combine(basePath, "index");
         private readonly Lucene.Net.Store.Directory directory;
-        private readonly Analyzer _analyzer;
+        private readonly CustomAnalyzer _analyzer;
         private readonly IndexWriter _writer;
 
         public LuceneSearchEngine()
         {
             directory = FSDirectory.Open(indexPath);
-            _analyzer = new StandardAnalyzer(Lucene.Net.Util.LuceneVersion.LUCENE_48);
+            _analyzer = new CustomAnalyzer();
             var indexConfig = new IndexWriterConfig(Lucene.Net.Util.LuceneVersion.LUCENE_48, _analyzer);
             _writer = new IndexWriter(directory, indexConfig);
         }
