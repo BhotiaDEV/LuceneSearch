@@ -98,7 +98,7 @@ namespace LuceneConsoleApp
             
             var query = parser.Parse(search);
 
-            var collector = TopScoreDocCollector.Create(20, true);
+            var collector = TopScoreDocCollector.Create(100, true);
             indexSearcher.Search(query, collector);
 
 
