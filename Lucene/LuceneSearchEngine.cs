@@ -41,39 +41,73 @@ namespace LuceneConsoleApp
 
         public void AddDocumentToIndex()
         {
-            var doc = new Document();
+
+            // Read all files belonging to a specific file type
             string[] pdffiles = System.IO.Directory.GetFiles("Data", "*.pdf");
             string[] textfiles = System.IO.Directory.GetFiles("Data", "*.txt");
             string[] docfiles = System.IO.Directory.GetFiles("Data", "*.doc");
-            if (!pdffiles.Any())
+            string[] pptfiles = System.IO.Directory.GetFiles("Data", "*.ppt*");
+            string[] excelfiles = System.IO.Directory.GetFiles("Data", "*.xls*");
+
+
+            if (pdffiles.Any())
             {
                 PdfDocService pdfDocService = new PdfDocService();
                 foreach(string pdffile in pdffiles)
                 {
-                     var pdfcontent = pdfDocService.ReadPdf(pdffile);
-                    doc.Add(new TextField("Path", "Data/Renewables2022.pdf" , Field.Store.YES));
+                    var doc = new Document();
+                    var pdfcontent = pdfDocService.ReadPdf(pdffile);
+                    doc.Add(new StringField("Title", "Renewables2022.pdf" , Field.Store.YES));
                     doc.Add(new TextField("Content", pdfcontent , Field.Store.YES));
                     _writer.AddDocument(doc);
                 }
             }
-            if (!textfiles.Any())
+            if (pptfiles.Any())
+            {
+                PptDocService pptDocService = new PptDocService();
+                foreach (string pptfile in pptfiles)
+                {
+                    var doc = new Document();
+                    var pptcontent = pptDocService.ReadPpt(pptfile);
+                    doc.Add(new StringField("Title", "Renewables2022.pdf", Field.Store.YES));
+                    doc.Add(new TextField("Content", pptcontent, Field.Store.YES));
+                    _writer.AddDocument(doc);
+                }
+            }
+            if (excelfiles.Any())
+            {
+                ExcelDocService excelDocService = new ExcelDocService();
+                foreach (string excelfile in excelfiles)
+                {
+                    var doc = new Document();
+                    List<string> excelcontents = excelDocService.ReadExcel(excelfile);
+                    foreach(string excelcontent in excelcontents)
+                    {
+                        doc.Add(new StringField("Title", "Renewables2022.pdf", Field.Store.YES));
+                        doc.Add(new TextField("Content", excelcontent, Field.Store.YES));
+                        _writer.AddDocument(doc);
+                    }
+                }
+            }
+            if (textfiles.Any())
             {
                 foreach (string file in textfiles)
                 {
+                    var doc = new Document();
                     var textcontent = File.ReadAllText(file);
-                    string textpath = Path.GetFileName(file);
-                    doc.Add(new TextField("Path", textpath, Field.Store.YES));
+                    Console.WriteLine(Path.GetFileName(file));
+                    doc.Add(new StringField("Title", file, Field.Store.YES));
                     doc.Add(new TextField("Content", textcontent, Field.Store.YES));
                     _writer.AddDocument(doc);
                 }
             }
-            if (!docfiles.Any())
+            if (docfiles.Any())
             {
                 foreach (string file in docfiles)
                 {
+                    var doc = new Document();
                     var doccontent = File.ReadAllText(file);
-                    string docpath = Path.GetFileName(file);
-                    doc.Add(new TextField("Path", docpath, Field.Store.YES));
+                    doc.Add(new StringField("Title", file, Field.Store.YES));
                     doc.Add(new TextField("Content", doccontent, Field.Store.YES));
                     _writer.AddDocument(doc);
                 }
@@ -89,16 +123,16 @@ namespace LuceneConsoleApp
                 return Results;
             }
             
-            String[] textfields = { "Path", "Content" };
+            String[] fields = { "Title","Content" };
             var indexReader = DirectoryReader.Open(directory);
             var indexSearcher = new IndexSearcher(indexReader);
 
-            QueryParser parser = new MultiFieldQueryParser(Lucene.Net.Util.LuceneVersion.LUCENE_48, textfields, _analyzer);
+            MultiFieldQueryParser parser = new MultiFieldQueryParser(Lucene.Net.Util.LuceneVersion.LUCENE_48, fields, _analyzer);
             parser.AllowLeadingWildcard = true;
             
             var query = parser.Parse(search);
 
-            var collector = TopScoreDocCollector.Create(100, true);
+            var collector = TopScoreDocCollector.Create(10, true);
             indexSearcher.Search(query, collector);
 
 
@@ -109,16 +143,15 @@ namespace LuceneConsoleApp
             {
                 var id = hit.Doc;
                 var doc = indexSearcher.Doc(id);
-                DocModel data = new DocModel()
+                Results.Add( new DocModel()
                 {
-                    Path = doc.Get("Path"),
+                    Title = doc.Get("Title"),
                     Content = doc.Get("Content")
-                };
-                Results.Add(data);
+                });
+               Console.WriteLine(doc.Get("Title"));
+                // Results.Add(data);
             }
-
             return Results;
         }
-
     }
 }
